@@ -5,7 +5,8 @@ import sys
 
 def main():
 
-    admin_connection = "c:\data\gcf2015sde\demo3\gcf2015_demo3_admin.sde"
+    admin_connection = r"c:\data\gcf2015sde\demo3\gcf2015_demo3_admin.sde"
+    data_admin_connection = r"c:\data\gcf2015sde\demo3\gcf2015_demo3_da.sde"
 
     #新規接続の拒否
     print(u"新規接続を拒否します。")
@@ -45,6 +46,20 @@ def main():
     print(u"再度新規接続を許可します。")
     arcpy.AcceptConnections(admin_connection, True)
 
+    #データリストの取得
+    print(u"フィーチャクラスのリストを取得します")
+    arcpy.env.workspace = data_admin_connection
+    user_name = arcpy.Describe(arcpy.env.workspace).connectionProperties.user
+    data_list = arcpy.ListFeatureClasses(u'*.' + user_name + u'.*')
+    
+    #フィーチャクラスのインデックスの再構築
+    print(u"フィーチャクラスのインデックスを再構築します")
+    arcpy.RebuildIndexes_management(data_admin_connection, "NO_SYSTEM", data_list, "ALL")
+    
+    #フィーチャクラスの統計情報の更新
+    print(u"フィーチャクラスの統計情報を更新します。")
+    arcpy.AnalyzeDatasets_management(data_admin_connection, "NO_SYSTEM", data_list)
+    
 
 if __name__ == "__main__":
     main()
